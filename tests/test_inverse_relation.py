@@ -22,10 +22,7 @@ class InverseRelationEntity:
 class InverseRelationValue:
     def __init__(self, code, entities=None):
         self.code = code
-        if entities is None:
-            self.entities = []
-        else:
-            self.entities = entities
+        self.entities = [] if entities is None else entities
 
     @optapy.inverse_relation_shadow_variable(InverseRelationEntity, source_variable_name='value')
     def get_entities(self):

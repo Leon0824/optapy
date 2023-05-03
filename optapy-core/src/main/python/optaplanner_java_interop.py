@@ -74,8 +74,7 @@ def _get_python_object_attribute(object_id, name):
             return None
         elif isinstance(python_object, (str, bool, int, float, complex, java.util.Collection,
                                         org.optaplanner.core.api.score.Score)):
-            out = JObject(python_object, java.lang.Object)
-            return out
+            return JObject(python_object, java.lang.Object)
         elif hasattr(python_object_getter, '__optaplannerPlanningId'):
             return PythonComparable(
                 JProxy(org.optaplanner.jpyinterpreter.types.wrappers.OpaquePythonReference, inst=python_object,
@@ -92,9 +91,18 @@ def _get_python_object_attribute(object_id, name):
 def _get_python_array_to_id_array(the_object: List):
     """Maps a Python List to a Java List of OpaquePythonReference"""
     import org.optaplanner.jpyinterpreter.types.wrappers.OpaquePythonReference
-    out = _to_java_list(list(map(lambda x: JProxy(org.optaplanner.jpyinterpreter.types.wrappers.OpaquePythonReference,
-                                                  inst=x, convert=True), the_object)))
-    return out
+    return _to_java_list(
+        list(
+            map(
+                lambda x: JProxy(
+                    org.optaplanner.jpyinterpreter.types.wrappers.OpaquePythonReference,
+                    inst=x,
+                    convert=True,
+                ),
+                the_object,
+            )
+        )
+    )
 
 
 def _get_python_array_to_java_list(the_object: List):
@@ -103,9 +111,7 @@ def _get_python_array_to_java_list(the_object: List):
 
 
 def _get_python_object_java_class(the_object):
-    if the_object is not None:
-        return get_class(the_object)
-    return None
+    return get_class(the_object) if the_object is not None else None
 
 
 def _set_python_object_attribute(object_id: int, name: str, value: Any) -> None:
@@ -119,7 +125,7 @@ def _set_python_object_attribute(object_id: int, name: str, value: Any) -> None:
         the_value = value.get__optapy_Id()
     elif isinstance(the_value, PythonObjectWrapper):
         the_value = value.getWrappedObject()
-    getattr(the_object, str(name))(the_value)
+    getattr(the_object, name)(the_value)
 
 
 def _deep_clone_python_object(the_object: Any):
@@ -136,7 +142,7 @@ def _deep_clone_python_object(the_object: Any):
     from org.optaplanner.optapy import PythonWrapperGenerator  # noqa
     item = PythonWrapperGenerator.getPythonObject(the_object)
     run_id = item._optapy_solver_run_id  # noqa ; cannot use __ since then we cannot access it here
-    the_clone = _planning_clone(item, dict())
+    the_clone = _planning_clone(item, {})
 
     # Only need to keep two references: the best solution, and the working solution
     solver_run_id_to_refs[run_id].append(the_clone)  # add the new working solution
@@ -167,7 +173,7 @@ def _planning_clone(item, memo):
     if item_id in memo:
         return memo[item_id]
     elif isinstance(item, Sequence):
-        out = list()
+        out = []
         memo[item_id] = out
         for element in item:
             if _is_deep_planning_clone(element):
@@ -175,10 +181,7 @@ def _planning_clone(item, memo):
                 out.append(planning_clone)
             else:
                 out.append(element)
-        if isinstance(item, MutableSequence):
-            return out
-        else:
-            return tuple(out)
+        return out if isinstance(item, MutableSequence) else tuple(out)
     elif isinstance(item, Set):
         out = set()
         memo[item_id] = out
@@ -190,7 +193,7 @@ def _planning_clone(item, memo):
                 out.add(element)
         return out
     elif isinstance(item, Mapping):
-        out = dict()
+        out = {}
         memo[item_id] = out
         for key, value in item.items():
             new_key = key
@@ -338,11 +341,15 @@ def init(*args, path: List[str] = None, include_optaplanner_jars: bool = True, l
         include_optaplanner_jars = True
         path = []
     if include_optaplanner_jars:
-        path = path + extract_optaplanner_jars()
-    if len(args) == 0:
-        args = (jpype.getDefaultJVMPath(), '-Dlogback.level.org.optaplanner={}'.format(log_level))  # noqa
-    else:
-        args = args + ('-Dlogback.level.org.optaplanner={}'.format(log_level),)
+        path += extract_optaplanner_jars()
+    args = (
+        args + (f'-Dlogback.level.org.optaplanner={log_level}',)
+        if args
+        else (
+            jpype.getDefaultJVMPath(),
+            f'-Dlogback.level.org.optaplanner={log_level}',
+        )
+    )
     init(*args, path=path, include_translator_jars=False)
     import java.util.function.Function
     import java.util.function.BiFunction
@@ -414,7 +421,7 @@ def set_class_output_directory(path: pathlib.Path):
     PythonBytecodeToJavaBytecodeTranslator.classOutputRootPath = path
 
 
-solver_run_id_to_refs = dict()
+solver_run_id_to_refs = {}
 """Maps solver run id to solution clones it references"""
 
 
@@ -900,8 +907,8 @@ def _add_shallow_copy_to_class(the_class: Type):
     :return: None
     """
     sig = signature(the_class.__init__)
-    keyword_args = dict()
-    positional_args = list()
+    keyword_args = {}
+    positional_args = []
     skip_self_parameter = True
     for parameter_name, parameter in sig.parameters.items():
         if skip_self_parameter:
@@ -909,7 +916,10 @@ def _add_shallow_copy_to_class(the_class: Type):
             continue
         if parameter.default == Parameter.empty and parameter.kind != Parameter.VAR_POSITIONAL and \
                 parameter.kind != Parameter.VAR_KEYWORD:
-            if parameter.kind == Parameter.POSITIONAL_ONLY or parameter.kind == Parameter.POSITIONAL_OR_KEYWORD:
+            if parameter.kind in [
+                Parameter.POSITIONAL_ONLY,
+                Parameter.POSITIONAL_OR_KEYWORD,
+            ]:
                 positional_args.append(None)
             else:
                 keyword_args[parameter_name] = None
@@ -973,9 +983,11 @@ def _get_optaplanner_annotations(python_class: Type) -> List[Tuple[str, JClass, 
                    attribute.startswith('__') is False]
     annotated_methods = []
     for method in method_list:
-        optaplanner_annotations = [attribute for attribute in dir(getattr(python_class, method)) if
-                                   attribute.startswith('__optaplanner')]
-        if optaplanner_annotations:
+        if optaplanner_annotations := [
+            attribute
+            for attribute in dir(getattr(python_class, method))
+            if attribute.startswith('__optaplanner')
+        ]:
             return_type = getattr(getattr(python_class, method), "__optapy_return", None)
             method_signature = getattr(getattr(python_class, method), "__optapy_signature", None)
             annotated_methods.append(
@@ -1015,7 +1027,7 @@ def get_class(python_class: Union[Type, Callable]) -> JClass:
 unique_class_id = 0
 """A unique identifier; used to guarantee the generated class java name is unique"""
 
-class_identifier_to_java_class_map = dict()
+class_identifier_to_java_class_map = {}
 """Maps a class identifier to the corresponding java class (the last one defined with that identifier)"""
 
 

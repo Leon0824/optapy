@@ -79,19 +79,19 @@ class FunctionVerifier:
         cloner = get_argument_cloner(clone_arguments)
         java_result = self.java_function(*cloner(args))
         untyped_java_result = self.untyped_java_function(*cloner(args))
-        if java_result != expected or untyped_java_result != expected:
-            if java_result != expected and untyped_java_result != expected:
+        if java_result != expected:
+            if untyped_java_result != expected:
                 raise AssertionError(f'Typed and untyped translated bytecode did not return expected result '
                                      f'({expected}) for arguments {args}; it returned ({java_result}) (typed) '
                                      f'and ({untyped_java_result}) (untyped) instead.')
-            elif untyped_java_result != expected:
-                raise AssertionError(f'Untyped translated bytecode did not return expected result '
-                                     f'({expected}) for arguments {args}; it returned ({untyped_java_result}) '
-                                     f'(untyped) instead.')
             else:
                 raise AssertionError(f'Typed translated bytecode did not return expected result '
                                      f'({expected}) for arguments {args}; it returned ({java_result}) '
                                      f'(typed) instead.')
+        elif untyped_java_result != expected:
+            raise AssertionError(f'Untyped translated bytecode did not return expected result '
+                                 f'({expected}) for arguments {args}; it returned ({untyped_java_result}) '
+                                 f'(untyped) instead.')
         if type_check and (type(java_result) is not type(expected) or type(untyped_java_result) is not type(expected)):
             if type(java_result) is not type(expected) and type(untyped_java_result) is not type(expected):
                 raise AssertionError(f'Typed and untyped translated bytecode did not return expected result '

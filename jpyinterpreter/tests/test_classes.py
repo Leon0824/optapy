@@ -3,6 +3,9 @@ from .conftest import verifier_for
 
 
 def test_create_instance():
+
+
+
     class A:
         value: int
 
@@ -10,9 +13,8 @@ def test_create_instance():
             self.value = value
 
         def __eq__(self, other):
-            if not isinstance(other, A):
-                return False
-            return self.value == other.value
+            return self.value == other.value if isinstance(other, A) else False
+
 
     def create_instance(x: int) -> A:
         return A(x)
@@ -162,6 +164,7 @@ def test_simple_super_method():
 
 
 def test_chained_super_method():
+
     class A:
         def __init__(self, start):
             self.start = start
@@ -177,12 +180,15 @@ def test_chained_super_method():
         def my_method(self, text):
             return super().my_method(text) + self.end
 
+
+
     class C(B):
         def __init__(self, start, end):
             super().__init__(start, end)
 
         def my_method(self, text):
-            return '[' + super().my_method(text) + ']'
+            return f'[{super().my_method(text)}]'
+
 
     def my_function(start: str, end: str, text: str) -> str:
         return C(start, end).my_method(text)
@@ -274,6 +280,7 @@ def test_virtual_unpack_iterable():
 
 
 def test_virtual_unpack_keywords():
+
     class A:
         def helper(self, **kwargs: int) -> set:
             return set(kwargs.items())
@@ -297,7 +304,7 @@ def test_virtual_unpack_keywords():
         'alone': 0,
     }, expected_result={('alone', 0)})
 
-    verifier.verify(dict(), expected_result=set())
+    verifier.verify({}, expected_result=set())
 
 
 def test_virtual_unpack_iterable_and_keywords():
@@ -483,6 +490,7 @@ def test_static_unpack_iterable():
 
 
 def test_static_unpack_keywords():
+
     class A:
         @staticmethod
         def helper(**kwargs: int) -> set:
@@ -510,7 +518,7 @@ def test_static_unpack_keywords():
         'alone': 0,
     }, expected_result={('alone', 0)})
 
-    verifier.verify(dict(), expected_result=set())
+    verifier.verify({}, expected_result=set())
 
     verifier = verifier_for(my_function_instance)
 
@@ -528,7 +536,7 @@ def test_static_unpack_keywords():
         'alone': 0,
     }, expected_result={('alone', 0)})
 
-    verifier.verify(dict(), expected_result=set())
+    verifier.verify({}, expected_result=set())
 
 
 def test_static_unpack_iterable_and_keywords():
@@ -743,6 +751,7 @@ def test_class_unpack_iterable():
 
 
 def test_class_unpack_keywords():
+
     class A:
         @classmethod
         def helper(cls: type, **kwargs: int) -> set:
@@ -770,7 +779,7 @@ def test_class_unpack_keywords():
         'alone': 0,
     }, expected_result={('alone', 0)})
 
-    verifier.verify(dict(), expected_result=set())
+    verifier.verify({}, expected_result=set())
 
     verifier = verifier_for(my_function_instance)
 
@@ -788,7 +797,7 @@ def test_class_unpack_keywords():
         'alone': 0,
     }, expected_result={('alone', 0)})
 
-    verifier.verify(dict(), expected_result=set())
+    verifier.verify({}, expected_result=set())
 
 
 def test_class_unpack_iterable_and_keywords():

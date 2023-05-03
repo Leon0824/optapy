@@ -35,7 +35,7 @@ def init(*args, path: List[str] = None, include_translator_jars: bool = True,
         include_translator_jars = True
         path = []
     if include_translator_jars:
-        path = path + extract_python_translator_jars()
+        path += extract_python_translator_jars()
     jpype.startJVM(*args, classpath=path, convertStrings=True)  # noqa
 
     if class_output_path is not None:
@@ -166,7 +166,7 @@ class CallPythonFunction:
         actual_vargs = unwrap_python_like_object(var_args_list)
         actual_keyword_args = unwrap_python_like_object(keyword_args_map)
         if actual_keyword_args is None:
-            actual_keyword_args = dict()
+            actual_keyword_args = {}
         try:
             out = python_object(*actual_vargs, **actual_keyword_args)
             return convert_to_java_python_like_object(out)

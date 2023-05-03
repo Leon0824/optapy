@@ -48,8 +48,8 @@ def test_camel_case_for_all_snake_case_methods():
             if getattr(class_type, camel_case_name) is not function[1]:
                 incorrect.append(function)
 
-        assert len(missing) == 0
-        assert len(incorrect) == 0
+        assert not missing
+        assert not incorrect
 
 
 def test_snake_case_for_all_camel_case_methods():
@@ -71,8 +71,8 @@ def test_snake_case_for_all_camel_case_methods():
             if getattr(class_type, snake_case_name) is not function[1]:
                 incorrect.append(function)
 
-        assert len(missing) == 0
-        assert len(incorrect) == 0
+        assert not missing
+        assert not incorrect
 
 
 def test_has_all_methods():
@@ -95,4 +95,4 @@ def test_has_all_methods():
             if not hasattr(python_type, function_name):
                 missing.append(function_name)
 
-        assert len(missing) == 0
+        assert not missing

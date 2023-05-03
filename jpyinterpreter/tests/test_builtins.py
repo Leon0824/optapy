@@ -166,7 +166,7 @@ def test_divmod():
 
 def test_dict():
     def my_function(x: object) -> dict:
-        out = dict()
+        out = {}
         out['key'] = x
         return out
 
@@ -358,7 +358,7 @@ def test_list():
         return list(x)
 
     def my_function_no_args() -> list:
-        return list()
+        return []
 
     verifier = verifier_for(my_function)
     no_args_verifier = verifier_for(my_function_no_args)

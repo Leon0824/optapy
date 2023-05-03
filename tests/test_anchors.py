@@ -102,10 +102,9 @@ def test_chained():
     assert solution.score.getScore() == 9
     anchor = solution.entities[0].anchor
     assert anchor is not None
-    anchor_value_count = 0
-    for entity in solution.entities:
-        if entity.value == anchor:
-            anchor_value_count += 1
+    anchor_value_count = sum(
+        1 for entity in solution.entities if entity.value == anchor
+    )
     assert anchor_value_count == 1
     for entity in solution.entities:
         assert entity.anchor == anchor

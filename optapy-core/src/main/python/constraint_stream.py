@@ -316,7 +316,7 @@ def extract_joiners(joiner_tuple, *stream_types):
     from org.optaplanner.core.api.score.stream.quad import QuadJoiner
     from org.optaplanner.core.api.score.stream.penta import PentaJoiner
 
-    if len(joiner_tuple) == 1 and (isinstance(joiner_tuple[0], list) or isinstance(joiner_tuple[0], tuple)):
+    if len(joiner_tuple) == 1 and (isinstance(joiner_tuple[0], (list, tuple))):
         joiner_tuple = joiner_tuple[0] # Joiners was passed as a list of Joiners instead of varargs
     array_size = len(joiner_tuple)
     output_array = None

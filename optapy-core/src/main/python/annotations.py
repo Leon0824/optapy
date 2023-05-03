@@ -321,7 +321,7 @@ def inverse_relation_shadow_variable(source_type: Type, source_variable_name: st
 
 
 def __verify_is_problem_fact(type, problem_fact_type):
-    if type == str or type == int or type == bool:
+    if type in [str, int, bool]:
         # These built-in python types have direct java equivalents
         # and thus can be used in Lists without an illegal item on the stack
         return
@@ -703,8 +703,7 @@ def easy_score_calculator(easy_score_calculator_function: Callable[[Solution_], 
     return easy_score_calculator_function
 
 
-def incremental_score_calculator(incremental_score_calculator: Type['_IncrementalScoreCalculator']) -> \
-        Type['_IncrementalScoreCalculator']:
+def incremental_score_calculator(incremental_score_calculator: Type['_IncrementalScoreCalculator']) -> Type['_IncrementalScoreCalculator']:
     """Used for incremental python Score calculation. This is much faster than EasyScoreCalculator
     but requires much more code to implement too.
 
@@ -758,11 +757,11 @@ def incremental_score_calculator(incremental_score_calculator: Type['_Incrementa
         methods.extend(['getIndictmentMap', 'getConstraintMatchTotals'])
         base_interface = ConstraintMatchAwareIncrementalScoreCalculator
 
-    missing_method_list = []
-    for method in methods:
-        if not callable(getattr(incremental_score_calculator, method, None)):
-            missing_method_list.append(method)
-    if len(missing_method_list) != 0:
+    if missing_method_list := [
+        method
+        for method in methods
+        if not callable(getattr(incremental_score_calculator, method, None))
+    ]:
         raise ValueError(f'The following required methods are missing from @incremental_score_calculator class '
                          f'{incremental_score_calculator}: {missing_method_list}')
     for method in methods:
@@ -834,7 +833,7 @@ def variable_listener(variable_listener_class: Type['_VariableListener'] = None,
         for method in methods:
             if not callable(getattr(the_variable_listener_class, method, None)):
                 missing_method_list.append(method)
-        if len(missing_method_list) != 0:
+        if missing_method_list:
             raise ValueError(f'The following required methods are missing from @variable_listener class '
                              f'{the_variable_listener_class}: {missing_method_list}')
         for method in methods:

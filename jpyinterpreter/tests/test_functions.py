@@ -100,7 +100,7 @@ def test_unpack_keywords():
         'alone': 0,
     }, expected_result={('alone', 0)})
 
-    verifier.verify(dict(), expected_result=set())
+    verifier.verify({}, expected_result=set())
 
 
 def test_unpack_iterable_and_keywords():
@@ -153,9 +153,7 @@ def test_vargs_with_manatory_args():
 
 def test_recursion():
     def fib(x: int) -> int:
-        if x <= 1:
-            return 1
-        return fib(x - 1) + fib(x - 2)
+        return 1 if x <= 1 else fib(x - 1) + fib(x - 2)
 
     fib_verifier = verifier_for(fib)
 
@@ -169,14 +167,10 @@ def test_recursion():
 
 def test_alternative_recursion():
     def is_even(x: int) -> bool:
-        if x == 0:
-            return True
-        return is_odd(x - 1)
+        return True if x == 0 else is_odd(x - 1)
 
     def is_odd(x: int) -> bool:
-        if x == 0:
-            return False
-        return is_even(x - 1)
+        return False if x == 0 else is_even(x - 1)
 
     is_even_verifier = verifier_for(is_even)
 
@@ -191,7 +185,7 @@ def test_alternative_recursion():
 def test_inner_function():
     def my_function(x: int) -> int:
         def inner_function(y: int) -> int:
-            return y * y
+            return y**2
 
         return inner_function(x) + inner_function(x)
 
@@ -244,7 +238,7 @@ def test_nested_cell_variable():
     def my_function(x: int) -> tuple:
         def inner_function_1() -> int:
             nonlocal x
-            y = x * x
+            y = x**2
 
             def inner_function_2() -> int:
                 nonlocal x

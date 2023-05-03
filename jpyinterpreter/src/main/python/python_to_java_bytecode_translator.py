@@ -11,15 +11,15 @@ from jpype import JInt, JLong, JDouble, JBoolean, JProxy, JClass, JArray
 MINIMUM_SUPPORTED_PYTHON_VERSION = (3, 9)
 MAXIMUM_SUPPORTED_PYTHON_VERSION = (3, 11)
 
-global_dict_to_instance = dict()
-global_dict_to_key_set = dict()
-type_to_compiled_java_class = dict()
-function_interface_pair_to_instance = dict()
-function_interface_pair_to_class = dict()
+global_dict_to_instance = {}
+global_dict_to_key_set = {}
+type_to_compiled_java_class = {}
+function_interface_pair_to_instance = {}
+function_interface_pair_to_class = {}
 
 
 def is_python_version_supported(python_version):
-    python_version_major_minor = python_version[0:2]
+    python_version_major_minor = python_version[:2]
     return MINIMUM_SUPPORTED_PYTHON_VERSION <= python_version_major_minor <= MAXIMUM_SUPPORTED_PYTHON_VERSION
 
 
@@ -92,9 +92,7 @@ def is_c_native(item):
 
     # __main__ is a built-in module, according to Python (and this be seen as c-native). We can also compile builtins,
     # so return False, so we can compile them
-    if module == '__main__' or \
-            module == 'builtins' \
-            or module == '':  # if we cannot find module, assume it is not native
+    if module in {'__main__', 'builtins', ''}:  # if we cannot find module, assume it is not native
         return False
 
     return is_native_module(importlib.import_module(module))
@@ -261,7 +259,7 @@ def convert_object_to_java_python_like_object(value, instance_map=None):
                                                                         instance_map)
 
         if isinstance(out, AbstractPythonLikeObject):
-            for (key, value) in getattr(value, '__dict__', dict()).items():
+            for (key, value) in getattr(value, '__dict__', {}).items():
                 out.setAttribute(key, convert_to_java_python_like_object(value, instance_map))
 
         return out
@@ -292,7 +290,7 @@ def convert_object_to_java_python_like_object(value, instance_map=None):
                                                                             instance_map)
 
             if isinstance(out, AbstractPythonLikeObject):
-                for (key, value) in getattr(value, '__dict__', dict()).items():
+                for (key, value) in getattr(value, '__dict__', {}).items():
                     out.setAttribute(key, convert_to_java_python_like_object(value, instance_map))
 
             return out
@@ -416,12 +414,10 @@ def convert_to_java_python_like_object(value, instance_map=None):
             if type_to_compiled_java_class[raw_type] is None:
                 return None
             out = type_to_compiled_java_class[raw_type]
-            put_in_instance_map(instance_map, value, out)
-            return out
         else:
             out = translate_python_class_to_java_class(raw_type)
-            put_in_instance_map(instance_map, value, out)
-            return out
+        put_in_instance_map(instance_map, value, out)
+        return out
     elif isinstance(value, ModuleType) and repr(value).startswith('<module \'') and not \
             is_banned_module(value.__name__):  # should not convert java modules
         out = PythonModule(instance_map)
@@ -457,8 +453,7 @@ def unwrap_python_like_object(python_like_object, default=NotImplementedError):
     from types import CellType
 
     if isinstance(python_like_object, (PythonObjectWrapper, JavaObjectWrapper)):
-        out = python_like_object.getWrappedObject()
-        return out
+        return python_like_object.getWrappedObject()
     elif isinstance(python_like_object, PythonNone):
         return None
     elif isinstance(python_like_object, JavaNotImplemented):
@@ -480,30 +475,26 @@ def unwrap_python_like_object(python_like_object, default=NotImplementedError):
         imaginary = unwrap_python_like_object(python_like_object.getImaginary())
         return complex(real, imaginary)
     elif isinstance(python_like_object, (PythonLikeTuple, tuple)):
-        out = []
-        for item in python_like_object:
-            out.append(unwrap_python_like_object(item, default))
+        out = [unwrap_python_like_object(item, default) for item in python_like_object]
         return tuple(out)
     elif isinstance(python_like_object, List):
-        out = []
-        for item in python_like_object:
-            out.append(unwrap_python_like_object(item, default))
-        return out
+        return [
+            unwrap_python_like_object(item, default)
+            for item in python_like_object
+        ]
     elif isinstance(python_like_object, Set):
-        out = set()
-        for item in python_like_object:
-            out.add(unwrap_python_like_object(item, default))
-
+        out = {unwrap_python_like_object(item, default) for item in python_like_object}
         if isinstance(python_like_object, PythonLikeFrozenSet):
             return frozenset(out)
 
         return out
     elif isinstance(python_like_object, Map):
-        out = dict()
-        for entry in python_like_object.entrySet():
-            out[unwrap_python_like_object(entry.getKey(), default)] = unwrap_python_like_object(entry.getValue(),
-                                                                                                default)
-        return out
+        return {
+            unwrap_python_like_object(
+                entry.getKey(), default
+            ): unwrap_python_like_object(entry.getValue(), default)
+            for entry in python_like_object.entrySet()
+        }
     elif isinstance(python_like_object, PythonSlice):
         return slice(unwrap_python_like_object(python_like_object.start),
                      unwrap_python_like_object(python_like_object.stop),
@@ -635,11 +626,10 @@ def get_java_type_for_python_type(the_type):
         the_type = erase_generic_args(the_type)
         if the_type in type_to_compiled_java_class:
             return type_to_compiled_java_class[the_type]
-        else:
-            try:
-                return translate_python_class_to_java_class(the_type)
-            except:
-                return type_to_compiled_java_class[the_type]
+        try:
+            return translate_python_class_to_java_class(the_type)
+        except:
+            return type_to_compiled_java_class[the_type]
     if isinstance(the_type, str):
         try:
             the_type = erase_generic_args(the_type)
@@ -711,14 +701,12 @@ def copy_closure(closure):
     from org.optaplanner.jpyinterpreter.types.collections import PythonLikeTuple
     from org.optaplanner.jpyinterpreter import CPythonBackedPythonInterpreter
     out = PythonLikeTuple()
-    if closure is None:
-        return out
-    else:
+    if closure is not None:
         for cell in closure:
             java_cell = PythonCell()
             java_cell.cellValue = convert_to_java_python_like_object(cell.cell_contents, CPythonBackedPythonInterpreter.pythonObjectIdToConvertedObjectMap)
             out.add(java_cell)
-        return out
+    return out
 
 
 def copy_globals(globals_dict, co_names):
@@ -846,8 +834,13 @@ def get_function_bytecode_object(python_function):
                                                                      inspect.getfullargspec(python_function).varkw)
     python_compiled_function.defaultPositionalArguments = convert_to_java_python_like_object(
         python_function.__defaults__ if python_function.__defaults__ else tuple())
-    python_compiled_function.defaultKeywordArguments = convert_to_java_python_like_object(
-        python_function.__kwdefaults__ if python_function.__kwdefaults__ else dict())
+    python_compiled_function.defaultKeywordArguments = (
+        convert_to_java_python_like_object(
+            python_function.__kwdefaults__
+            if python_function.__kwdefaults__
+            else {}
+        )
+    )
     python_compiled_function.supportExtraPositionalArgs = inspect.getfullargspec(python_function).varargs is not None
     python_compiled_function.supportExtraKeywordsArgs = inspect.getfullargspec(python_function).varkw is not None
     python_compiled_function.pythonVersion = PythonVersion(sys.hexversion)
@@ -899,7 +892,9 @@ def get_code_bytecode_object(python_code):
     python_compiled_function.globalsMap = HashMap()
     python_compiled_function.typeAnnotations = HashMap()
     python_compiled_function.defaultPositionalArguments = convert_to_java_python_like_object(tuple())
-    python_compiled_function.defaultKeywordArguments = convert_to_java_python_like_object(dict())
+    python_compiled_function.defaultKeywordArguments = (
+        convert_to_java_python_like_object({})
+    )
     python_compiled_function.typeAnnotations = HashMap()
     python_compiled_function.supportExtraPositionalArgs = False
     python_compiled_function.supportExtraKeywordsArgs = False
@@ -914,17 +909,19 @@ def translate_python_bytecode_to_java_bytecode(python_function, java_function_ty
 
     python_compiled_function = get_function_bytecode_object(python_function)
 
-    if len(type_args) == 0:
-        out = PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecode(python_compiled_function,
-                                                                             java_function_type)
-        function_interface_pair_to_instance[(python_function, java_function_type, type_args)] = out
-        return out
-    else:
-        out = PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecode(python_compiled_function,
-                                                                             java_function_type,
-                                                                             copy_iterable(type_args))
-        function_interface_pair_to_instance[(python_function, java_function_type, type_args)] = out
-        return out
+    out = (
+        PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecode(
+            python_compiled_function,
+            java_function_type,
+            copy_iterable(type_args),
+        )
+        if type_args
+        else PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecode(
+            python_compiled_function, java_function_type
+        )
+    )
+    function_interface_pair_to_instance[(python_function, java_function_type, type_args)] = out
+    return out
 
 
 def _force_translate_python_bytecode_to_generator_java_bytecode(python_function, java_function_type):
@@ -947,17 +944,19 @@ def translate_python_code_to_java_class(python_function, java_function_type, *ty
 
     python_compiled_function = get_code_bytecode_object(python_function)
 
-    if len(type_args) == 0:
-        out = PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecodeToClass(python_compiled_function,
-                                                                                    java_function_type)
-        function_interface_pair_to_class[(python_function, java_function_type, type_args)] = out
-        return out
-    else:
-        out = PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecodeToClass(python_compiled_function,
-                                                                                    java_function_type,
-                                                                                    copy_iterable(type_args))
-        function_interface_pair_to_class[(python_function, java_function_type, type_args)] = out
-        return out
+    out = (
+        PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecodeToClass(
+            python_compiled_function,
+            java_function_type,
+            copy_iterable(type_args),
+        )
+        if type_args
+        else PythonBytecodeToJavaBytecodeTranslator.translatePythonBytecodeToClass(
+            python_compiled_function, java_function_type
+        )
+    )
+    function_interface_pair_to_class[(python_function, java_function_type, type_args)] = out
+    return out
 
 
 def translate_python_code_to_python_wrapper_class(python_function):
@@ -1062,9 +1061,7 @@ def erase_generic_args(python_type):
     from typing import get_origin
     if isinstance(python_type, type):
         out = python_type
-        if get_origin(out) is not None:
-            return get_origin(out)
-        return out
+        return get_origin(out) if get_origin(out) is not None else out
     elif isinstance(python_type, str):
         try:
             generics_start = python_type.index('[')

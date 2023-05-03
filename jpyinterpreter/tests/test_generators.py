@@ -32,8 +32,7 @@ def test_loop_generator():
 
 def test_iterator_loop_generator():
     def my_function(x: int):
-        for i in range(x):
-            yield i
+        yield from range(x)
 
     generator_verifier = verifier_for(my_function)
     generator_verifier.verify_property(1, predicate=assert_yield_values(tuple(range(1))))
@@ -82,9 +81,8 @@ def test_try_except_in_generator():
         try:
             if x == 'ValueError':
                 raise ValueError
-            else:
-                yield 'Try'
-                raise KeyError
+            yield 'Try'
+            raise KeyError
 
         except ValueError:
             yield 'Value1'

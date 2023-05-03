@@ -24,9 +24,7 @@ class Queen:
         return self.column
 
     def getRowIndex(self):
-        if self.row is None:
-            return float('-inf')
-        return self.row
+        return float('-inf') if self.row is None else self.row
 
     def getAscendingDiagonalIndex(self):
         return self.getColumnIndex() + self.getRowIndex()
@@ -68,6 +66,9 @@ class Solution:
 
 
 def test_constraint_match_disabled_incremental_score_calculator():
+
+
+
     @optapy.incremental_score_calculator
     class IncrementalScoreCalculator:
         score: int
@@ -77,16 +78,16 @@ def test_constraint_match_disabled_incremental_score_calculator():
 
         def resetWorkingSolution(self, working_solution: Solution):
             n = working_solution.n
-            self.row_index_map = dict()
-            self.ascending_diagonal_index_map = dict()
-            self.descending_diagonal_index_map = dict()
+            self.row_index_map = {}
+            self.ascending_diagonal_index_map = {}
+            self.descending_diagonal_index_map = {}
             for i in range(n):
-                self.row_index_map[i] = list()
-                self.ascending_diagonal_index_map[i] = list()
-                self.descending_diagonal_index_map[i] = list()
+                self.row_index_map[i] = []
+                self.ascending_diagonal_index_map[i] = []
+                self.descending_diagonal_index_map[i] = []
                 if i != 0:
-                    self.ascending_diagonal_index_map[n - 1 + i] = list()
-                    self.descending_diagonal_index_map[-i] = list()
+                    self.ascending_diagonal_index_map[n - 1 + i] = []
+                    self.descending_diagonal_index_map[-i] = []
             self.score = 0
             for queen in working_solution.queen_list:
                 self.insert(queen)
@@ -140,6 +141,7 @@ def test_constraint_match_disabled_incremental_score_calculator():
         def calculateScore(self) -> optapy.score.SimpleScore:
             return optapy.score.SimpleScore.of(self.score)
 
+
     solver_config = optapy.config.solver.SolverConfig()
     termination_config = optapy.config.solver.termination.TerminationConfig()
     termination_config.setBestScoreLimit('0')
@@ -166,6 +168,9 @@ def test_constraint_match_disabled_incremental_score_calculator():
 
 
 def test_constraint_match_enabled_incremental_score_calculator():
+
+
+
     @optapy.incremental_score_calculator
     class IncrementalScoreCalculator:
         score: int
@@ -175,16 +180,16 @@ def test_constraint_match_enabled_incremental_score_calculator():
 
         def resetWorkingSolution(self, working_solution: Solution, constraint_match_enabled=False):
             n = working_solution.n
-            self.row_index_map = dict()
-            self.ascending_diagonal_index_map = dict()
-            self.descending_diagonal_index_map = dict()
+            self.row_index_map = {}
+            self.ascending_diagonal_index_map = {}
+            self.descending_diagonal_index_map = {}
             for i in range(n):
-                self.row_index_map[i] = list()
-                self.ascending_diagonal_index_map[i] = list()
-                self.descending_diagonal_index_map[i] = list()
+                self.row_index_map[i] = []
+                self.ascending_diagonal_index_map[i] = []
+                self.descending_diagonal_index_map[i] = []
                 if i != 0:
-                    self.ascending_diagonal_index_map[n - 1 + i] = list()
-                    self.descending_diagonal_index_map[-i] = list()
+                    self.ascending_diagonal_index_map[n - 1 + i] = []
+                    self.descending_diagonal_index_map[-i] = []
             self.score = 0
             for queen in working_solution.queen_list:
                 self.insert(queen)
@@ -274,6 +279,7 @@ def test_constraint_match_enabled_incremental_score_calculator():
 
         def getIndictmentMap(self):
             return None
+
 
     solver_config = optapy.config.solver.SolverConfig()
     termination_config = optapy.config.solver.termination.TerminationConfig()

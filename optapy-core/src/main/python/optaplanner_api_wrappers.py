@@ -39,7 +39,7 @@ class _PythonSolverManager(Generic[Solution_, ProblemId_]):
         from org.optaplanner.optapy import PythonSolver  # noqa
         from org.optaplanner.core.api.solver import SolverManager
         self.delegate = SolverManager.create(solver_config)
-        self.problem_id_to_solver_run_ref_list = dict()
+        self.problem_id_to_solver_run_ref_list = {}
         self.only_use_java_setters = PythonSolver.onlyUseJavaSetters
 
     def _optapy_debug_get_solver_runs_dicts(self):
@@ -171,11 +171,7 @@ class _PythonScoreManager:
         try:
             return function(wrapped_problem)
         except JException as e:
-            error_message = f'An error occurred when getting the score. This can occur when functions take the ' \
-                            f'wrong number of parameters (ex: a setter that does not take exactly one parameter) or ' \
-                            f'by a function returning an incompatible return type (ex: returning a str in a filter, ' \
-                            f'which expects a bool). This can also occur when an exception is raised when evaluating ' \
-                            f'constraints/getters/setters.'
+            error_message = 'An error occurred when getting the score. This can occur when functions take the wrong number of parameters (ex: a setter that does not take exactly one parameter) or by a function returning an incompatible return type (ex: returning a str in a filter, which expects a bool). This can also occur when an exception is raised when evaluating constraints/getters/setters.'
             raise RuntimeError(error_message) from e
         finally:
             _cleanup_solver_run(solver_run_id)
@@ -212,8 +208,8 @@ def _wrap_object(object_to_wrap, instance_map, update_function):
     return PythonWrapperGenerator.wrap(object_class, object_to_wrap, instance_map, update_function)
 
 
-_problem_change_director_to_instance_dict = dict()
-_problem_change_director_to_update_function = dict()
+_problem_change_director_to_instance_dict = {}
+_problem_change_director_to_update_function = {}
 
 
 @JImplementationFor('org.optaplanner.core.api.solver.change.ProblemChangeDirector')
@@ -418,11 +414,7 @@ class _PythonSolver:
         try:
             return _unwrap_java_object(self._java_solve(wrapped_problem))
         except JException as e:
-            error_message = f'An error occurred during solving. This can occur when functions take the wrong number '\
-                            f'of parameters (ex: a setter that does not take exactly one parameter) or by ' \
-                            f'a function returning an incompatible return type (ex: returning a str in a filter, ' \
-                            f'which expects a bool). This can also occur when an exception is raised when evaluating ' \
-                            f'constraints/getters/setters.'
+            error_message = 'An error occurred during solving. This can occur when functions take the wrong number of parameters (ex: a setter that does not take exactly one parameter) or by a function returning an incompatible return type (ex: returning a str in a filter, which expects a bool). This can also occur when an exception is raised when evaluating constraints/getters/setters.'
             raise RuntimeError(error_message) from e
         finally:
             _cleanup_solver_run(solver_run_id)

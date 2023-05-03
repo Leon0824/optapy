@@ -6,7 +6,7 @@ def test_while_loops():
         total = 0
         while x > 0:
             total += x
-            x = x - 1
+            x -= 1
         return total
 
     function_verifier = verifier_for(my_function)
@@ -26,8 +26,8 @@ def test_inner_loops():
             remaining = y
             while remaining > 0:
                 total += remaining * x
-                remaining = remaining - 1
-            x = x - 1
+                remaining -= 1
+            x -= 1
         return total
 
     function_verifier = verifier_for(my_function)
@@ -110,8 +110,7 @@ def test_continues_in_iterable_loop():
 
 def test_iterating_generator():
     def my_generator(x: int):
-        for i in range(x + 1):
-            yield i
+        yield from range(x + 1)
 
     def my_function(x: int) -> int:
         total = 0

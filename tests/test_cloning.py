@@ -142,7 +142,7 @@ def test_clone_solution():
 
     original_solution = ExampleSolution("solution", original_value_list, original_entity_list, original_score)
 
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert original_solution is not clone_solution
     assert original_solution.code == clone_solution.code
     assert clone_solution.value_list is original_value_list
@@ -176,7 +176,7 @@ def test_clone_solution_with_immutable_collections():
 
     original_solution = ExampleSolution("solution", original_value_list, original_entity_list, original_score)
 
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert original_solution is not clone_solution
     assert original_solution.code == clone_solution.code
     assert clone_solution.value_list is original_value_list
@@ -210,7 +210,7 @@ def test_clone_solution_with_sets():
 
     original_solution = ExampleSolution("solution", original_value_list, original_entity_list, original_score)
 
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert original_solution is not clone_solution
     assert original_solution.code == clone_solution.code
     assert clone_solution.value_list is original_value_list
@@ -240,7 +240,7 @@ def test_clone_extended_solution():
     original_solution = ExampleExtendedSolution(original_extra_object, "solution", original_value_list,
                                                 original_entity_list, original_score)
 
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert original_solution is not clone_solution
     assert original_solution.extra_object is clone_solution.extra_object
     assert original_solution.code == clone_solution.code
@@ -277,7 +277,7 @@ def test_clone_extended_thirdparty_solution():
     original_solution = ExampleExtendedThirdPartySolution(original_extra_object, "solution", original_value_list,
                                                           original_entity_list, original_score)
 
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert original_solution is not clone_solution
     assert original_solution.extra_object is clone_solution.extra_object
     assert original_solution.code == clone_solution.code
@@ -383,7 +383,7 @@ def test_clone_chained_solution():
     entity_list = [a1, a2, a3, b1]
 
     original_solution = ExampleChainedSolution('solution', anchor_list, entity_list, [], original_score)
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert clone_solution is not original_solution
     assert clone_solution.code is original_solution.code
     assert clone_solution.chained_anchor_list is anchor_list
@@ -545,7 +545,7 @@ def test_clone_chained_shadowing_solution():
     entity_list = [a1, a2, a3, b1]
 
     original_solution = ExampleShadowingChainedSolution('solution', anchor_list, entity_list, [], original_score)
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert clone_solution is not original_solution
     assert clone_solution.code is original_solution.code
     assert clone_solution.score is original_score
@@ -690,7 +690,7 @@ def test_deep_planning_clone():
                                           general_shadow_variable_list, None)
     # ...somehow passing it to the constructor changes it?
     value_list = original.value_list
-    clone = optapy._planning_clone(original, dict())
+    clone = optapy._planning_clone(original, {})
 
     assert clone is not original
     assert clone.code == 'solution'
@@ -786,7 +786,7 @@ def test_clone_custom_deep_clone_class():
     original_solution = ExampleDeepPlanningCloneSolution("solution", original_value_list, original_entity_list,
                                                          original_score)
 
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert original_solution is not clone_solution
     assert original_solution.code == clone_solution.code
     assert clone_solution.value_list is not original_value_list
@@ -869,7 +869,7 @@ def test_supports_entity_to_solution_backlinking():
     original_solution = ExampleSolution("solution", original_value_list, original_entity_list, original_score)
     a = ExampleSolutionBacklinkingEntity('A', None, original_solution)
     original_entity_list.append(a)
-    clone_solution = optapy._planning_clone(original_solution, dict())
+    clone_solution = optapy._planning_clone(original_solution, {})
     assert a.solution is original_solution
     assert original_solution is not clone_solution
     assert original_solution.code == clone_solution.code

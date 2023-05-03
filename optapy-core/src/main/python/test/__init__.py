@@ -231,7 +231,7 @@ class SingleConstraintAssertion:
                 self.delegate.penalizes()
             elif times is not None and message is None:
                 self.delegate.penalizes(times)
-            elif times is None and message is not None:
+            elif times is None:
                 self.delegate.penalizes(message)
             else:
                 self.delegate.penalizes(times, message)
@@ -363,7 +363,7 @@ class SingleConstraintAssertion:
                 self.delegate.rewards()
             elif times is not None and message is None:
                 self.delegate.rewards(times)
-            elif times is None and message is not None:
+            elif times is None:
                 self.delegate.rewards(message)
             else:
                 self.delegate.rewards(times, message)

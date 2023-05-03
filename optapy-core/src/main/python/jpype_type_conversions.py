@@ -178,9 +178,7 @@ class PythonPentaPredicate:
 def _has_java_class(item):
     if isinstance(item, (JObject, int, str, bool)):
         return True
-    if hasattr(type(item), '__optapy_java_class'):
-        return True
-    return False
+    return bool(hasattr(type(item), '__optapy_java_class'))
 
 
 def _proxy(value):

@@ -97,6 +97,7 @@ def test_solve_partial():
 
 
 def test_solve_nullable():
+
     class Code:
         value: str
 
@@ -192,8 +193,8 @@ def test_solve_nullable():
 
     assert solution.score.getHardScore() == 1
     assert solution.score.getSoftScore() == 1
-    assert solution.entities[0].value == v1 or solution.entities[0].value == None
-    assert solution.entities[1].value == v1 or solution.entities[1].value == None
+    assert solution.entities[0].value == v1 or solution.entities[0].value is None
+    assert solution.entities[1].value == v1 or solution.entities[1].value is None
 
 
 def test_solve_typed():

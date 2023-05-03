@@ -74,48 +74,39 @@ def merge_files(canon_file: ET.Element, identical_files: List[ET.Element]) -> Co
 
 
 def merge_lines(canon_line: ET.Element, identical_lines: List[ET.Element]) -> CoverageInfo:
-    is_hit = False
-    for line in identical_lines:
-        if line.get('hits') == '1':
-            is_hit = True
-            break
-
+    is_hit = any(line.get('hits') == '1' for line in identical_lines)
     canon_line.set('hits', '1' if is_hit else '0')
     is_branch = canon_line.get('branch', 'false') == 'true'
-    if is_branch:
-        missed_branches = canon_line.get('missing-branches', '')
-        condition_coverage = canon_line.get('condition-coverage')
-        num_of_conditions = int(condition_coverage[condition_coverage.index('/') + 1:-1])
-        missing_branch_set = set(missed_branches.split(',')) if missed_branches != '' else set()
-        for line in identical_lines:
-            line_missed_branches = line.get('missing-branches', '')
-            line_missing_branch_set = set(line_missed_branches.split(',')) if line_missed_branches != '' else set()
-            missing_branch_set = missing_branch_set.intersection(line_missing_branch_set)
-
-        if len(missing_branch_set) == 0:
-            num_of_hit_branches = num_of_conditions
-            canon_line.attrib.pop('missing-branches', None)
-        else:
-            num_of_hit_branches = num_of_conditions - len(missing_branch_set)
-            canon_line.set('condition-coverage',
-                           f'{(num_of_hit_branches / num_of_conditions) * 100:.9g}% ({num_of_hit_branches}/{num_of_conditions})')
-            canon_line.set('missing-branches', ','.join(sorted(missing_branch_set)))
-
-        return CoverageInfo(1, 1 if is_hit else 0, num_of_conditions, num_of_hit_branches)
-    else:
+    if not is_branch:
         return CoverageInfo(1, 1 if is_hit else 0, 0, 0)
+    missed_branches = canon_line.get('missing-branches', '')
+    condition_coverage = canon_line.get('condition-coverage')
+    num_of_conditions = int(condition_coverage[condition_coverage.index('/') + 1:-1])
+    missing_branch_set = set(missed_branches.split(',')) if missed_branches != '' else set()
+    for line in identical_lines:
+        line_missed_branches = line.get('missing-branches', '')
+        line_missing_branch_set = set(line_missed_branches.split(',')) if line_missed_branches != '' else set()
+        missing_branch_set = missing_branch_set.intersection(line_missing_branch_set)
+
+    if len(missing_branch_set) == 0:
+        num_of_hit_branches = num_of_conditions
+        canon_line.attrib.pop('missing-branches', None)
+    else:
+        num_of_hit_branches = num_of_conditions - len(missing_branch_set)
+        canon_line.set('condition-coverage',
+                       f'{(num_of_hit_branches / num_of_conditions) * 100:.9g}% ({num_of_hit_branches}/{num_of_conditions})')
+        canon_line.set('missing-branches', ','.join(sorted(missing_branch_set)))
+
+    return CoverageInfo(1, 1 if is_hit else 0, num_of_conditions, num_of_hit_branches)
 
 
 def is_test_package(package_name: str) -> bool:
-    if package_name == 'tests':
-        return True
-    elif package_name.startswith('tests.'):
-        return True
-    elif package_name.endswith('.tests'):
-        return True
-    elif '.tests.' in package_name:
-        return True
-    return False
+    return bool(
+        package_name == 'tests'
+        or package_name.startswith('tests.')
+        or package_name.endswith('.tests')
+        or '.tests.' in package_name
+    )
 
 
 def is_ignored(package_name: str, ignore_jpyinterpreter: bool = False):
@@ -135,8 +126,8 @@ def update_coverage_xml(coverage_xml: ET.ElementTree, *, ignore_jpyinterpreter: 
             file.set('filename', fix_file_name(file_name))
 
     # Now merge all elements that represent the same packages/files
-    canonical_package_dict = dict()
-    package_name_to_packages = dict()
+    canonical_package_dict = {}
+    package_name_to_packages = {}
     for package in packages_element.findall('package'):
         package_name = package.get('name')
         if package_name not in canonical_package_dict:

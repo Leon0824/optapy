@@ -36,18 +36,16 @@ class FetchDependencies(build_py):
     def run(self):
         if not self.dry_run:
             project_root = Path(__file__).parent
-            # Do a mvn clean install
-            # which is configured to add dependency jars to 'target/dependency'
-            command = 'mvnw'
-            if platform.system() == 'Windows':
-                command = 'mvnw.cmd'
+            command = 'mvnw.cmd' if platform.system() == 'Windows' else 'mvnw'
             self.create_stubs(project_root, command)
             subprocess.run([str((project_root / command).absolute()), 'clean', 'install', '-Dasciidoctor.skip',
                             '-Dassembly.skipAssembly'],
                            cwd=project_root, check=True)
-            classpath_jars = []
-            # Add the main artifact
-            classpath_jars.extend(glob.glob(os.path.join(project_root, 'optapy-core', 'target', '*.jar')))
+            classpath_jars = list(
+                glob.glob(
+                    os.path.join(project_root, 'optapy-core', 'target', '*.jar')
+                )
+            )
             # Add the main artifact's dependencies
             classpath_jars.extend(glob.glob(os.path.join(project_root, 'optapy-core', 'target', 'dependency', '*.jar')))
             # Get the basename of each file (to be stored in classpath.txt, which is used
@@ -61,11 +59,8 @@ class FetchDependencies(build_py):
             for file in classpath_jars:
                 copyfile(file, os.path.join(self.build_lib, 'optapy', 'jars', os.path.basename(file)))
 
-            # Add classpath.txt to optapy
-            fp = open(os.path.join(self.build_lib, 'optapy', 'classpath.txt'), 'w')
-            fp.write(classpath_list_text)
-            fp.close()
-
+            with open(os.path.join(self.build_lib, 'optapy', 'classpath.txt'), 'w') as fp:
+                fp.write(classpath_list_text)
             # Make optapy.jars a Python module
             fp = open(os.path.join(self.build_lib, 'optapy', 'jars', '__init__.py'), 'w')
             fp.close()
@@ -81,10 +76,9 @@ def find_stub_files(stub_root: str):
     """
     for root, dirs, files in os.walk(stub_root):
         for file in files:
-            if file.endswith(".pyi"):
-                if os.path.sep in root:
-                    sub_root = root.split(os.path.sep, 1)[-1]
-                    yield os.path.join(sub_root, file)
+            if file.endswith(".pyi") and os.path.sep in root:
+                sub_root = root.split(os.path.sep, 1)[-1]
+                yield os.path.join(sub_root, file)
 
 
 this_directory = Path(__file__).parent

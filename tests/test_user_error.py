@@ -57,16 +57,12 @@ def test_non_planning_solution_being_passed_to_solve():
     solver_config.withSolutionClass(Solution).withEntityClasses(Entity) \
         .withConstraintProviderClass(my_constraints)
     solver = optapy.solver_factory_create(solver_config).buildSolver()
-    with pytest.raises(ValueError, match=re.escape(
-            f'A problem was not passed to solve (parameter problem was ({None})). Maybe '
-            f'pass an instance of a class annotated with @planning_solution to solve?'
-    )):
+    with pytest.raises(ValueError, match=re.escape('A problem was not passed to solve (parameter problem was (None)). Maybe pass an instance of a class annotated with @planning_solution to solve?')):
         solver.solve(None)
 
 
 def test_non_problem_fact_being_passed_to_problem_fact_collection():
-    with pytest.raises(ValueError, match=f"<class '.*MyClass'> is not a @problem_fact. Maybe decorate "
-                                         f"<class '.*MyClass'> with @problem_fact?"):
+    with pytest.raises(ValueError, match="<class '.*MyClass'> is not a @problem_fact. Maybe decorate <class '.*MyClass'> with @problem_fact?"):
         class MyClass:
             pass
 

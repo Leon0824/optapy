@@ -26,16 +26,10 @@ class FetchDependencies(build_py):
     def run(self):
         if not self.dry_run:
             project_root = Path(__file__).parent
-            # Do a mvn clean install
-            # which is configured to add dependency jars to 'target/dependency'
-            command = 'mvnw'
-            if platform.system() == 'Windows':
-                command = 'mvnw.cmd'
+            command = 'mvnw.cmd' if platform.system() == 'Windows' else 'mvnw'
             self.create_stubs(project_root, command)
             subprocess.run([str((project_root / command).absolute()), 'clean', 'install'], cwd=project_root, check=True)
-            classpath_jars = []
-            # Add the main artifact
-            classpath_jars.extend(glob.glob(os.path.join(project_root, 'target', '*.jar')))
+            classpath_jars = list(glob.glob(os.path.join(project_root, 'target', '*.jar')))
             # Add the main artifact's dependencies
             classpath_jars.extend(glob.glob(os.path.join(project_root, 'target', 'dependency', '*.jar')))
             # Get the basename of each file (to be stored in classpath.txt, which is used
@@ -49,11 +43,8 @@ class FetchDependencies(build_py):
             for file in classpath_jars:
                 copyfile(file, os.path.join(self.build_lib, 'jpyinterpreter', 'jars', os.path.basename(file)))
 
-            # Add classpath.txt to optapy
-            fp = open(os.path.join(self.build_lib, 'jpyinterpreter', 'classpath.txt'), 'w')
-            fp.write(classpath_list_text)
-            fp.close()
-
+            with open(os.path.join(self.build_lib, 'jpyinterpreter', 'classpath.txt'), 'w') as fp:
+                fp.write(classpath_list_text)
             # Make optapy.jars a Python module
             fp = open(os.path.join(self.build_lib, 'jpyinterpreter', 'jars', '__init__.py'), 'w')
             fp.close()

@@ -34,10 +34,7 @@ class DefaultConstraintMatchTotal:
         self.constraint_id = ConstraintMatchTotal.composeConstraintId(constraint_package, constraint_name)
         self.constraint_weight = constraint_weight
         self.constraint_match_set = LinkedHashSet()
-        if constraint_weight is not None:
-            self.score = constraint_weight.zero()
-        else:
-            self.score = None
+        self.score = None if constraint_weight is None else constraint_weight.zero()
 
     @JOverride
     def getConstraintPackage(self):
@@ -176,7 +173,7 @@ class Joiners:
             raise ValueError
         elif mapping_or_left_mapping is not None and right_mapping is None:
             return SamePropertyUniJoiner(java_joiner, mapping_or_left_mapping)
-        elif mapping_or_left_mapping is not None and right_mapping is not None:
+        elif mapping_or_left_mapping is not None:
             return PropertyJoiner(java_joiner, mapping_or_left_mapping, right_mapping)
         else:
             raise ValueError
@@ -802,8 +799,6 @@ class ConstraintCollectors:
             return NoArgsConstraintCollector(JavaConstraintCollectors.max)
         elif function is not None and comparator is None:
             return GroupMappingSingleArgConstraintCollector(JavaConstraintCollectors.max, function)
-        elif function is None and comparator is not None:
-            raise NotImplementedError  # TODO
         else:
             raise NotImplementedError  # TODO
 
@@ -872,8 +867,6 @@ class ConstraintCollectors:
             return NoArgsConstraintCollector(JavaConstraintCollectors.min)
         elif function is not None and comparator is None:
             return GroupMappingSingleArgConstraintCollector(JavaConstraintCollectors.min, function)
-        elif function is None and comparator is not None:
-            raise NotImplementedError  # TODO
         else:
             raise NotImplementedError  # TODO
 
@@ -975,10 +968,7 @@ class ConstraintCollectors:
 
         :return:
         """
-        if collection_creator is None:
-            raise NotImplementedError  # TODO
-        else:
-            raise NotImplementedError  # TODO
+        raise NotImplementedError  # TODO
 
     toCollection = to_collection
 
@@ -1221,9 +1211,7 @@ class ConstraintCollectors:
             return KeyValueMappingConstraintCollector(JavaConstraintCollectors.toMap, key_mapper, value_mapper)
 
         arg_count = len(inspect.signature(merge_function_or_set_creator).parameters)
-        if arg_count == 1:  # set_creator
-            raise NotImplementedError
-        elif arg_count == 2:  # merge_function
+        if arg_count in {1, 2}:
             raise NotImplementedError
         else:
             raise ValueError
@@ -1322,9 +1310,7 @@ class ConstraintCollectors:
             return KeyValueMappingConstraintCollector(JavaConstraintCollectors.toSortedMap, key_mapper, value_mapper)
 
         arg_count = len(inspect.signature(merge_function_or_set_creator).parameters)
-        if arg_count == 1:  # set_creator
-            raise NotImplementedError
-        elif arg_count == 2:  # merge_function
+        if arg_count in {1, 2}:
             raise NotImplementedError
         else:
             raise ValueError

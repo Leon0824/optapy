@@ -45,7 +45,7 @@ def test_iter():
 
     to_list_verifier = verifier_for(to_list)
 
-    to_list_verifier.verify(dict(), expected_result=[])
+    to_list_verifier.verify({}, expected_result=[])
     to_list_verifier.verify({
         1: 'a',
         2: 'b'
@@ -92,9 +92,7 @@ def test_set_item():
 
     set_item_verifier = verifier_for(set_item)
 
-    set_item_verifier.verify(dict(), 'a', 1, expected_result={
-        'a': 1
-    })
+    set_item_verifier.verify({}, 'a', 1, expected_result={'a': 1})
     set_item_verifier.verify({'a': 1}, 'a', 2, expected_result={
         'a': 2
     })
@@ -119,10 +117,10 @@ def test_delete_item():
 
     delete_item_verifier.verify({1: 'a', 2: 'b'}, 1, expected_result={2: 'b'})
     delete_item_verifier.verify({1: 'a', 2: 'b'}, 2, expected_result={1: 'a'})
-    delete_item_verifier.verify({1: 'a'}, 1, expected_result=dict())
+    delete_item_verifier.verify({1: 'a'}, 1, expected_result={})
     delete_item_verifier.verify({1: 'a', 2: 'b'}, 'a', expected_error=KeyError)
     delete_item_verifier.verify({1: 'a', 2: 'b'}, 'd', expected_error=KeyError)
-    delete_item_verifier.verify(dict(), 'a', expected_error=KeyError)
+    delete_item_verifier.verify({}, 'a', expected_error=KeyError)
 
 
 def test_clear():
@@ -132,9 +130,9 @@ def test_clear():
 
     clear_verifier = verifier_for(clear)
 
-    clear_verifier.verify({1: 'a', 2: 'b'}, expected_result=dict())
-    clear_verifier.verify({2: 'b'}, expected_result=dict())
-    clear_verifier.verify(dict(), expected_result=dict())
+    clear_verifier.verify({1: 'a', 2: 'b'}, expected_result={})
+    clear_verifier.verify({2: 'b'}, expected_result={})
+    clear_verifier.verify({}, expected_result={})
 
 
 def test_copy():
@@ -146,7 +144,7 @@ def test_copy():
 
     copy_verifier.verify({1: 'a', 2: 'b'}, expected_result=({1: 'a', 2: 'b'}, False))
     copy_verifier.verify({2: 'b'}, expected_result=({2: 'b'}, False))
-    copy_verifier.verify(dict(), expected_result=(dict(), False))
+    copy_verifier.verify({}, expected_result=({}, False))
 
 
 def test_get():
@@ -206,7 +204,7 @@ def test_items():
     items_verifier = verifier_for(items)
     items_with_modification_verifier = verifier_for(items_with_modification)
 
-    items_verifier.verify(dict(), expected_result=[])
+    items_verifier.verify({}, expected_result=[])
     items_verifier.verify({'key': 'value'}, expected_result=[('key', 'value')])
     items_verifier.verify({
         1: 'a',
@@ -217,7 +215,7 @@ def test_items():
         'b': 2
     }, expected_result=[('a', 1), ('b', 2)])
 
-    items_with_modification_verifier.verify(dict(), expected_result=[('extra', 10)])
+    items_with_modification_verifier.verify({}, expected_result=[('extra', 10)])
     items_with_modification_verifier.verify({'key': 'value'}, expected_result=[('key', 'value'), ('extra', 10)])
     items_with_modification_verifier.verify({
         1: 'a',
@@ -245,7 +243,7 @@ def test_keys():
     keys_verifier = verifier_for(keys)
     keys_with_modification_verifier = verifier_for(keys_with_modification)
 
-    keys_verifier.verify(dict(), expected_result=[])
+    keys_verifier.verify({}, expected_result=[])
     keys_verifier.verify({'key': 'value'}, expected_result=['key'])
     keys_verifier.verify({
         1: 'a',
@@ -256,7 +254,7 @@ def test_keys():
         'b': 2
     }, expected_result=['a', 'b'])
 
-    keys_with_modification_verifier.verify(dict(), expected_result=['extra'])
+    keys_with_modification_verifier.verify({}, expected_result=['extra'])
     keys_with_modification_verifier.verify({'key': 'value'}, expected_result=['key', 'extra'])
     keys_with_modification_verifier.verify({
         1: 'a',
@@ -284,7 +282,7 @@ def test_values():
     values_verifier = verifier_for(values)
     values_with_modification_verifier = verifier_for(values_with_modification)
 
-    values_verifier.verify(dict(), expected_result=[])
+    values_verifier.verify({}, expected_result=[])
     values_verifier.verify({'key': 'value'}, expected_result=['value'])
     values_verifier.verify({
         1: 'a',
@@ -300,7 +298,7 @@ def test_values():
         'c': 2
     }, expected_result=[1, 2, 2])
 
-    values_with_modification_verifier.verify(dict(), expected_result=[10])
+    values_with_modification_verifier.verify({}, expected_result=[10])
     values_with_modification_verifier.verify({'key': 'value'}, expected_result=['value', 10])
     values_with_modification_verifier.verify({
         1: 'a',
@@ -380,7 +378,7 @@ def test_popitem():
         'a': 1,
         'c': 3
     }, expected_result=(('c', 3), {'b': 2, 'a': 1}))
-    popitem_verifier.verify(dict(), expected_error=KeyError)
+    popitem_verifier.verify({}, expected_error=KeyError)
 
 
 def test_reversed():
@@ -389,7 +387,7 @@ def test_reversed():
 
     to_reversed_list_verifier = verifier_for(to_reversed_list)
 
-    to_reversed_list_verifier.verify(dict(), expected_result=[])
+    to_reversed_list_verifier.verify({}, expected_result=[])
     to_reversed_list_verifier.verify({
         1: 'a',
         2: 'b'

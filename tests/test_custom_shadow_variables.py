@@ -7,14 +7,14 @@ from optapy.types import ScoreDirector
 
 
 def test_custom_shadow_variable():
+
+
+
     @optapy.variable_listener
     class MyVariableListener:
         def afterVariableChanged(self, score_director: ScoreDirector, entity: 'MyPlanningEntity'):
             score_director.beforeVariableChanged(entity, 'value_squared')
-            if entity.value is None:
-                entity.value_squared = None
-            else:
-                entity.value_squared = entity.value ** 2
+            entity.value_squared = None if entity.value is None else entity.value ** 2
             score_director.afterVariableChanged(entity, 'value_squared')
 
         def beforeVariableChanged(self, score_director: ScoreDirector, entity: 'MyPlanningEntity'):
@@ -31,6 +31,7 @@ def test_custom_shadow_variable():
 
         def afterEntityRemoved(self, score_director: ScoreDirector, entity: 'MyPlanningEntity'):
             pass
+
 
     @optapy.planning_entity
     class MyPlanningEntity:
